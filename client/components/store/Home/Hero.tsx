@@ -6,7 +6,7 @@ import { WaveDivider } from "./WaveDivider";
 
 export function Hero() {
   return (
-    <section className="relative pt-18 md:pb-24 bg-[var(--color-secondary-light)] min-h-[90vh] md:min-h-screen md:flex md:flex-col">
+    <section className="relative pt-18 md:pb-24 bg-[var(--color-secondary-light)] min-h-[95vh] md:min-h-screen md:flex md:flex-col">
       <Container className="flex-1 flex flex-col justify-center">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center md:h-full">
           <div className="order-2 md:order-1 text-left">
@@ -38,7 +38,7 @@ export function Hero() {
             <img
               src="/home/hero.jpeg"
               alt="Blanquería artesanal para bebés"
-              className="w-full h-[300px] md:h-full md:min-h-[500px] object-cover rounded-lg md:rounded-3xl"
+              className="w-full h-[220px] md:h-full md:min-h-[500px] object-cover rounded-lg md:rounded-3xl"
             />
           </div>
         </div>
