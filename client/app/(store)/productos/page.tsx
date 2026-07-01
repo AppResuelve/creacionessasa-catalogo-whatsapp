@@ -281,11 +281,10 @@ export default function Products() {
     <>
       {/* ══ HERO — crema, sin divider ══ */}
       <section
-        className="relative overflow-hidden px-4 sm:px-6 lg:px-8"
+        className="relative overflow-hidden px-4 sm:px-6 lg:px-8 pb-6 md:pb-16"
         style={{
           backgroundColor: "var(--color-background)",
           paddingTop: "5rem",
-          paddingBottom: "4rem",
         }}
       >
         {/* Pétalos decorativos */}

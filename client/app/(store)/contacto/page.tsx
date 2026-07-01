@@ -90,11 +90,10 @@ export default function Contact() {
     <>
       {/* ══ HERO — crema floral ══ */}
       <section
-        className="relative overflow-hidden px-4 sm:px-6 lg:px-8"
+        className="relative overflow-hidden px-4 sm:px-6 lg:px-8 pb-8 md:pb-24"
         style={{
           backgroundColor: "var(--color-background)",
           paddingTop: "5rem",
-          paddingBottom: "6rem",
         }}
       >
         <div

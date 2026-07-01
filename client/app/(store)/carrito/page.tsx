@@ -25,11 +25,10 @@ function CartEmpty({ emptyTitle, emptyMessage, browseProducts }) {
   return (
     <>
       <section
-        className="relative overflow-hidden px-4 sm:px-6 lg:px-8"
+        className="relative overflow-hidden px-4 sm:px-6 lg:px-8 pb-8 md:pb-20"
         style={{
           backgroundColor: "var(--color-background)",
           paddingTop: "5rem",
-          paddingBottom: "5rem",
         }}
       >
         <div className="relative max-w-7xl mx-auto">
@@ -166,11 +165,10 @@ export default function Cart() {
     <>
       {/* ══ HERO — crema floral ══ */}
       <section
-        className="relative overflow-hidden px-4 sm:px-6 lg:px-8"
+        className="relative overflow-hidden px-4 sm:px-6 lg:px-8 pb-4 md:pb-12"
         style={{
           backgroundColor: "var(--color-background)",
           paddingTop: "5rem",
-          paddingBottom: "3rem",
         }}
       >
         <div

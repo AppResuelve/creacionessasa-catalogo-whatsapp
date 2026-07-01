@@ -69,7 +69,7 @@ export default function Services() {
 
   return (
     <>
-      <section className="relative overflow-hidden px-4 sm:px-6 lg:px-8" style={{ backgroundColor: "var(--color-background)", paddingTop: "5rem", paddingBottom: "4rem" }}>
+      <section className="relative overflow-hidden px-4 sm:px-6 lg:px-8 pb-6 md:pb-16" style={{ backgroundColor: "var(--color-background)", paddingTop: "5rem" }}>
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
