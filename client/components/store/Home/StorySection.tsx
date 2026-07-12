@@ -18,14 +18,9 @@ export function StorySection() {
             </h2>
             <div className="space-y-4 text-[var(--color-text-secondary)] leading-relaxed">
               <p>
-                Creaciones Sasa nació de la mano de Sandra, quien descubrió en
-                la costura una forma de acompañar a otras mamás en el momento
-                más especial de sus vidas.
-              </p>
-              <p>
-                Cada pieza está pensada, cortada y cosida con la misma
-                dedicación que pondrías al preparar el cuarto de tu propio bebé.
-                Sin apuros, sin atajos.
+                Creaciónes Sasa nace de la pasión por crear, puntada tras puntada, ajuares soñados por familias, en el momento más especial de sus vidas, como es la llegada de un hijo.
+                Hace más de 15 años que nuestro propósito es ser parte de esa ilusión.
+                Gracias por elegir el valor de lo artesanal
               </p>
             </div>
           </div>

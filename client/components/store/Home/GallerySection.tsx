@@ -2,7 +2,7 @@
 import { Container } from "./Container";
 
 const images = Array.from(
-  { length: 8 },
+  { length: 9 },
   (_, i) => `/ambientes/ambiente${i + 1}.jpeg`,
 );
 

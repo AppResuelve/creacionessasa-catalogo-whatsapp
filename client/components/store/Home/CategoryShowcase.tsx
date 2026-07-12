@@ -4,23 +4,23 @@ import { Container } from "./Container";
 
 const categories = [
   {
-    name: "Accesorios bebé",
+    name: "Accesorios",
     href: "/productos?categoria=accesorios-bebe",
     image: "/home/accesorios-bebe.jpeg",
     description:
-      "Los detalles que hacen única cada pieza. Baberos, mantitas y más.",
+      "Detalles que los hacen únicos\n*Baberos, babitas, portachupetes y más…",
   },
   {
     name: "Mantas",
     href: "/productos?categoria=mantas",
     image: "/home/mantas.jpeg",
-    description: "Suaves, abrigadas, para envolver con amor.",
+    description: "Suavidad que envuelve con amor",
   },
   {
     name: "Hora del baño",
     href: "/productos?categoria=hora-del-bano",
     image: "/home/hora-del-bano.jpeg",
-    description: "Toallones, batitas y accesorios para después del baño.",
+    description: "Toallones, batas, toallas, indispensable para el baño de tu bebé",
   },
 ];
 
@@ -50,9 +50,10 @@ export function CategoryShowcase() {
                   >
                     {cat.name}
                   </h3>
-                  <p className="text-[var(--color-text-secondary)] leading-relaxed mb-6 max-w-md">
-                    {cat.description}
-                  </p>
+                  <p
+                    className="text-[var(--color-text-secondary)] leading-relaxed mb-6 max-w-md"
+                    dangerouslySetInnerHTML={{ __html: cat.description.replace(/\n/g, '<br />') }}
+                  />
                   <Link
                     href={cat.href}
                     className="text-sm font-medium text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] transition-colors flex items-center gap-1.5"

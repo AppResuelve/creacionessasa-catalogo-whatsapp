@@ -10,18 +10,17 @@ export function Hero() {
       <Container className="flex-1 flex flex-col justify-center">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center md:h-full">
           <div className="order-2 md:order-1 text-left">
-            <span className="inline-block text-xs font-medium tracking-[0.2em] uppercase text-[var(--color-primary)] mb-6">
-              Blanquería artesanal para bebés
-            </span>
             <h1
               className="text-4xl md:text-5xl lg:text-6xl font-light leading-[1.08] text-[var(--color-text-primary)] mb-6"
               style={{ fontFamily: "var(--font-heading)" }}
             >
-              Cada pieza confeccionada como si fuera para nuestro propio bebé.
+              Blanquearía para bebés.
+              <br />
+              Hecho a mano, creado con amor.
             </h1>
             <Link
               href="/productos"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium text-white transition-colors"
+              className="hidden md:inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium text-white transition-colors"
               style={{ backgroundColor: "var(--color-primary)" }}
               onMouseEnter={(e) =>
                 (e.currentTarget.style.backgroundColor =
@@ -38,17 +37,24 @@ export function Hero() {
             <img
               src="/home/hero.jpeg"
               alt="Blanquería artesanal para bebés"
-              className="w-full h-[220px] md:h-full md:min-h-[500px] object-cover rounded-lg md:rounded-3xl"
+              className="w-full h-[350px] md:h-full md:min-h-[500px] object-cover rounded-lg md:rounded-3xl"
             />
           </div>
         </div>
       </Container>
       <WaveDivider fillColor="var(--color-background)" />
-      <img
-        src="/logotipo-buho.webp"
-        alt="Creaciones Sasa"
-        className="absolute left-1/2 -translate-x-1/2 -bottom-4 md:bottom-[80px] w-[200px] z-20"
-      />
+      <Link
+        href="/productos"
+        className="absolute bottom-0 left-0 right-0 flex justify-center pb-7 md:hidden z-20"
+      >
+        <span
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium text-white transition-colors"
+          style={{ backgroundColor: "var(--color-primary)" }}
+        >
+          Ver colección
+        </span>
+      </Link>
+
     </section>
   );
 }

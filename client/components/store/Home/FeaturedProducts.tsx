@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Container } from "./Container";
-import { ProductCard } from "@/components/store/ProductCard";
+import { ProductCarousel } from "@/components/shared/ProductCarousel";
 import { productsService } from "@/services/storeService";
 
 export function FeaturedProducts() {
@@ -40,11 +40,7 @@ export function FeaturedProducts() {
   return (
     <section className="py-12 md:py-16">
       <Container>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-8">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        <ProductCarousel products={products} />
       </Container>
     </section>
   );

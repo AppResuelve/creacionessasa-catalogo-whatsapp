@@ -17,8 +17,7 @@ export default function HomeClient() {
       <Container>
         <SectionTitle
           badge="Categorías"
-          title="Para cada momento"
-          subtitle="Cada rincón del cuarto merece la misma dedicación."
+          title="Nuestros productos confeccionados con la misma dedicación para cada momento"
         />
       </Container>
       <CategoryShowcase />
