@@ -81,3 +81,9 @@ body:has(.admin-root) ::selection {
     cursor: pointer;
   }
 }
+
+@media (hover: none) and (pointer: coarse) {
+  .group > .opacity-0 {
+    opacity: 1 !important;
+  }
+}
