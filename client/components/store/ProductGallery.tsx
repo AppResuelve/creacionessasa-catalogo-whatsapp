@@ -29,7 +29,7 @@ export function ProductGallery({ images, productName, discountPercentage }) {
         <img
           src={images[currentIndex]}
           alt={`${productName} - Imagen ${currentIndex + 1}`}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain"
         />
 
         {discountPercentage && (
@@ -76,7 +76,7 @@ export function ProductGallery({ images, productName, discountPercentage }) {
               <img
                 src={image}
                 alt={`${productName} - Miniatura ${index + 1}`}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
               />
             </button>
           ))}
