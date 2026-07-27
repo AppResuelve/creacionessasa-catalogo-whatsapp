@@ -7,9 +7,6 @@ export function StorySection() {
       <Container>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center">
           <div>
-            <span className="inline-block text-xs font-medium tracking-[0.2em] uppercase text-[var(--color-primary)] mb-4">
-              Nuestra historia
-            </span>
             <h2
               className="text-3xl md:text-4xl font-light text-[var(--color-text-primary)] mb-6"
               style={{ fontFamily: "var(--font-heading)" }}
