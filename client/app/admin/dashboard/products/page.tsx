@@ -1,8 +1,8 @@
 // @ts-nocheck
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Plus, Search, Edit, Trash2, FileSpreadsheet, MoreHorizontal } from 'lucide-react'
 import { Button } from '@/components/admin/ui/Form'
 import { DropdownSelect } from '@/components/admin/ui/DropdownSelect'
@@ -19,11 +19,12 @@ import { formatPrice } from '@/components/admin/lib/utils'
 
 export default function Products() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const Alert = useAlert()
   const [search, setSearch] = useState('')
   const [categoryId, setCategoryId] = useState('')
   const [tagId, setTagId] = useState('')
-  const [page, setPage] = useState(1)
+  const [page, setPage] = useState(() => Number(searchParams?.get('page')) || 1)
   const [bulkOpen, setBulkOpen] = useState(false)
   const [toggling, setToggling] = useState(null)
   const [selected, setSelected] = useState([])
@@ -36,12 +37,19 @@ export default function Products() {
   const { categories } = useCategories()
   const { tags } = useTags()
 
+  useEffect(() => {
+    const sp = new URLSearchParams(searchParams?.toString() || '')
+    if (page > 1) sp.set('page', String(page))
+    else sp.delete('page')
+    router.replace(`/dashboard/products?${sp.toString()}`)
+  }, [page])
+
   const handleToggleStatus = async (e, product) => {
     e.stopPropagation()
     const newStatus = product.status === 'active' ? 'draft' : 'active'
     setToggling(product.id)
     try {
-      await api.put(`/admin/products/${product.id}`, { status: newStatus })
+      await api.patch(`/admin/products/${product.id}/status`, { status: newStatus })
       updateProduct(product.id, { status: newStatus })
     } catch (err) {
       Alert.fire({ message: 'Error al cambiar estado', type: 'error' })
@@ -65,7 +73,7 @@ export default function Products() {
     setBulkProcessing(true)
     try {
       for (const id of selected) {
-        await api.put(`/admin/products/${id}`, { status })
+        await api.patch(`/admin/products/${id}/status`, { status })
         updateProduct(id, { status })
       }
       Alert.fire({ message: `${selected.length} producto(s) ${status === 'active' ? 'activados' : 'pasados a borrador'}`, type: 'success' })
@@ -158,6 +166,12 @@ export default function Products() {
     },
     { header: 'Precio', accessor: (p) => formatPrice(p.retailPrice) },
     {
+      header: 'Variantes',
+      accessor: (p) => (
+        <span className="text-sm text-zinc-400">{p.skus?.length ?? 0}</span>
+      ),
+    },
+    {
       header: 'Estado',
       accessor: (p) => (
         <button
@@ -182,7 +196,7 @@ export default function Products() {
       header: 'Acciones',
       accessor: (p) => (
         <div className="flex items-center gap-1">
-          <button onClick={(e) => { e.stopPropagation(); router.push(`/dashboard/products/${p.id}`) }} className="p-1.5 rounded-lg text-zinc-400 hover:text-cyan-400 hover:bg-cyan-500/10 transition-colors">
+          <button onClick={(e) => { e.stopPropagation(); router.push(`/dashboard/products/${p.id}?page=${page}`) }} className="p-1.5 rounded-lg text-zinc-400 hover:text-cyan-400 hover:bg-cyan-500/10 transition-colors">
             <Edit className="w-4 h-4" />
           </button>
           <button onClick={(e) => { e.stopPropagation(); handleDelete(p) }} className="p-1.5 rounded-lg text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors">
@@ -300,7 +314,7 @@ export default function Products() {
       <Table
         columns={columns}
         data={products}
-        onRowClick={(p) => router.push(`/dashboard/products/${p.id}`)}
+        onRowClick={(p) => router.push(`/dashboard/products/${p.id}?page=${page}`)}
         emptyMessage="No hay productos"
         selectable
         selected={selected}

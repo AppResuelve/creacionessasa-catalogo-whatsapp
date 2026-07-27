@@ -1,9 +1,9 @@
 // @ts-nocheck
 'use client'
 import { useState, useEffect, useMemo, Fragment } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Image, Trash2, Plus } from 'lucide-react'
+import { ArrowLeft, Image, Trash2, Plus, Search, X, Check, SlidersHorizontal } from 'lucide-react'
 import { Button, Input, Textarea } from '@/components/admin/ui/Form'
 import { DropdownSelect } from '@/components/admin/ui/DropdownSelect'
 import { Checkbox } from '@/components/admin/ui/Checkbox'
@@ -36,6 +36,39 @@ const EMPTY_SKU = {
 const slugify = (text) =>
   text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').substring(0, 255)
 
+function AttributeValueCard({ value, images, onRemove, onUpdateImages }) {
+  const [expanded, setExpanded] = useState(false)
+
+  return (
+    <div className="rounded-xl border border-zinc-700 bg-zinc-900/50 overflow-hidden">
+      <div role="button" tabIndex={0} onClick={() => setExpanded(!expanded)}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpanded(!expanded) } }}
+        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-zinc-800/30 transition-colors text-left cursor-pointer">
+        <span className={`text-zinc-500 text-xs transition-transform ${expanded ? 'rotate-90' : ''}`}>▶</span>
+        <span className="flex-1 text-sm font-medium text-zinc-200 truncate">{value}</span>
+        {images.length > 0 && (
+          <span className="text-xs text-zinc-500 shrink-0">{images.length} {images.length === 1 ? 'imagen' : 'imágenes'}</span>
+        )}
+        <button type="button" onClick={(e) => { e.stopPropagation(); onRemove() }}
+          className="p-1 text-zinc-500 hover:text-red-400 transition-colors shrink-0" title="Quitar valor">
+          <Trash2 className="w-4 h-4" />
+        </button>
+      </div>
+      {expanded && (
+        <div className="px-4 pb-4 border-t border-zinc-700 pt-3">
+          <ImageUpload
+            images={images}
+            onChange={onUpdateImages}
+            max={2}
+            cols={4}
+            folder="atributos"
+          />
+        </div>
+      )}
+    </div>
+  )
+}
+
 function SkuCard({ sku, index, attributes, onChange, onRemove, onStatusToggle }) {
   const [expanded, setExpanded] = useState(false)
   const Alert = useAlert()
@@ -62,7 +95,7 @@ function SkuCard({ sku, index, attributes, onChange, onRemove, onStatusToggle })
   }
 
   return (
-    <div className="rounded-xl border border-zinc-700 bg-zinc-900/50 overflow-hidden">
+    <div className="rounded-xl border border-zinc-700 bg-zinc-900/50">
       <div role="button" tabIndex={0} onClick={() => setExpanded(!expanded)}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpanded(!expanded) } }}
         className="w-full flex items-center gap-3 px-4 py-3 hover:bg-zinc-800/30 transition-colors text-left cursor-pointer">
@@ -107,9 +140,6 @@ function SkuCard({ sku, index, attributes, onChange, onRemove, onStatusToggle })
               onChange={(v) => handleChange('status', v)}
               options={[{ value: 'active', label: 'Activo' }, { value: 'draft', label: 'Borrador' }]} />
           </div>
-          <ImageUpload images={sku.images || []}
-            onChange={(imgs) => handleChange('images', imgs)} max={1}
-            folder={`productos/var-${sku.id || index}`} />
         </div>
       )}
     </div>
@@ -118,11 +148,15 @@ function SkuCard({ sku, index, attributes, onChange, onRemove, onStatusToggle })
 
 export default function ProductForm() {
   const { id } = useParams()
+  const searchParams = useSearchParams()
   const isEditing = Boolean(id) && id !== "new"
   const router = useRouter()
   const Alert = useAlert()
   const { product, loading: productLoading } = useProduct(id)
   const { categories } = useCategories()
+
+  const fromPage = searchParams?.get('page')
+  const backToList = fromPage ? `/dashboard/products?page=${fromPage}` : '/dashboard/products'
 
   const [form, setForm] = useState(EMPTY_PRODUCT)
   const [skus, setSkus] = useState([])
@@ -134,7 +168,8 @@ export default function ProductForm() {
   const [galleryOpen, setGalleryOpen] = useState(false)
   const [showPriceModal, setShowPriceModal] = useState(false)
   const [priceDefaults, setPriceDefaults] = useState({ retail: true, wholesale: true })
-  const [attrDropdownOpen, setAttrDropdownOpen] = useState(false)
+  const [attrSearch, setAttrSearch] = useState('')
+  const [attrSelectOpen, setAttrSelectOpen] = useState(false)
 
   const { isDirty, setIsDirty, confirmLeave } = useUnsavedChanges()
   const { tags } = useTags()
@@ -235,6 +270,30 @@ export default function ProductForm() {
     setModalAttrs(prev => ({ ...prev, [attr.id]: new Set() }))
   }
 
+  const modalAddAllValues = (attr) => {
+    setModalAttrs(prev => ({ ...prev, [attr.id]: new Set(attr.values.map(v => v.id)) }))
+  }
+
+  const modalToggleAttrValue = (attrId, valueId) => {
+    if (!modalAttrs[attrId]) {
+      setModalAttrs(prev => ({ ...prev, [attrId]: new Set([valueId]) }))
+      return
+    }
+    setModalAttrs(prev => {
+      const current = new Set(prev[attrId])
+      if (current.has(valueId)) {
+        current.delete(valueId)
+        if (current.size === 0) {
+          const { [attrId]: _, ...rest } = prev
+          return rest
+        }
+      } else {
+        current.add(valueId)
+      }
+      return { ...prev, [attrId]: current }
+    })
+  }
+
   const modalRemoveAttr = async (attrId) => {
     const attr = attributes.find(a => a.id === Number(attrId))
     const result = await Alert.fire({
@@ -281,6 +340,8 @@ export default function ProductForm() {
     const copy = {}
     Object.entries(selectedAttributes).forEach(([k, v]) => { copy[Number(k)] = new Set(v) })
     setModalAttrs(copy)
+    setAttrSearch('')
+    setAttrSelectOpen(false)
     setAttrModalOpen(false)
   }
 
@@ -295,36 +356,40 @@ export default function ProductForm() {
       setIsDirty(true)
       setSelectedAttributes({})
       setSkus([])
+      setAttrSearch('')
+      setAttrSelectOpen(false)
       setAttrModalOpen(false)
       return
     }
-    // Deep clone: rompe referencias compartidas + normaliza keys a número
     const confirmed = {}
     for (const [k, v] of Object.entries(modalAttrs)) {
       confirmed[Number(k)] = new Set(v)
     }
+    const generated = await handleGenerateSkus(confirmed)
+    if (generated === false) return
     setSelectedAttributes(confirmed)
+    setAttrSearch('')
+    setAttrSelectOpen(false)
     setAttrModalOpen(false)
     setIsDirty(true)
-    handleGenerateSkus(confirmed)
   }
 
-  const handleGenerateSkus = (attrs = selectedAttributes) => {
+  const handleGenerateSkus = async (attrs = selectedAttributes) => {
     const groups = Object.entries(attrs)
       .sort(([a], [b]) => Number(a) - Number(b))
       .map(([, vIds]) => [...vIds])
       .filter(g => g.length > 0)
 
-    if (!groups.length) return
+    if (!groups.length) return true
 
     // Primera vez: mostrar modal de precios
     if (skus.length === 0) {
       setShowPriceModal(true)
-      return
+      return true
     }
 
     // Ya hay SKUs → herencia silenciosa
-    doGenerateSkus(attrs, false)
+    return doGenerateSkus(attrs, false)
   }
 
   const doGenerateSkus = async (attrs, keepPriceDefaults = false) => {
@@ -377,11 +442,12 @@ export default function ProductForm() {
         confirmButtonText: 'Actualizar',
         cancelButtonText: 'Cancelar',
       })
-      if (!result.isConfirmed) return
+      if (!result.isConfirmed) return false
     }
 
     setSkus(newSkus)
     setShowPriceModal(false)
+    return true
   }
 
   const hasUnsyncedChanges = useMemo(() => {
@@ -430,7 +496,7 @@ export default function ProductForm() {
       else await api.post('/admin/products', payload)
       Alert.fire({ message: isEditing ? 'Producto actualizado' : 'Producto creado', type: 'success', duration: 1500 })
       setIsDirty(false)
-      router.push('/dashboard/products')
+      router.push(backToList)
     } catch (err) {
       Alert.fire({ message: err.response?.data?.error || 'Error al guardar producto', type: 'error' })
     } finally { setSaving(false) }
@@ -440,11 +506,9 @@ export default function ProductForm() {
     return <div className="flex items-center justify-center py-32"><Spinner /></div>
   }
 
-  const availableAttrs = attributes.filter(a => !selectedAttributes[a.id])
-
   return (
     <div>
-      <button onClick={async () => { if (await confirmLeave()) router.push('/dashboard/products') }} className="flex items-center gap-2 text-zinc-400 hover:text-zinc-200 mb-4 transition-colors">
+      <button onClick={async () => { if (await confirmLeave()) router.push(backToList) }} className="flex items-center gap-2 text-zinc-400 hover:text-zinc-200 mb-4 transition-colors">
         <ArrowLeft className="w-4 h-4" /><span className="text-sm">Volver a productos</span>
       </button>
 
@@ -464,20 +528,14 @@ export default function ProductForm() {
         <div className="grid grid-cols-3 items-end gap-4">
           <Input label="Precio de venta" type="number" min="0"
             value={form.retailPrice}
-            onChange={(e) => handleChange('retailPrice', e.target.value)}
-            readOnly={skus.length > 0}
-            disabled={skus.length > 0} />
+            onChange={(e) => handleChange('retailPrice', e.target.value)} />
           <Input label="% Descuento" type="number" min="1" max="100"
             value={form.discountPercentage || ''}
             onChange={(e) => handleChange('discountPercentage', e.target.value || null)}
-            placeholder="Ej: 25"
-            readOnly={skus.length > 0}
-            disabled={skus.length > 0} />
+            placeholder="Ej: 25" />
           <Input label="Precio de comparación" type="number" min="0"
             value={form.comparePrice || ''}
-            onChange={(e) => handleChange('comparePrice', e.target.value || null)}
-            readOnly={skus.length > 0}
-            disabled={skus.length > 0} />
+            onChange={(e) => handleChange('comparePrice', e.target.value || null)} />
         </div>
 
         {skus.length === 0 && (
@@ -502,19 +560,21 @@ export default function ProductForm() {
           </>
         )}
 
-        {skus.length > 0 && (
-          <div className="p-3 rounded-lg flex items-start gap-3"
-            style={{ backgroundColor: 'rgba(234,179,8,0.08)', border: '1px solid rgba(234,179,8,0.25)' }}>
-            <span className="text-sm shrink-0 mt-0.5">⚠️</span>
-            <div>
-              <p className="text-xs font-medium text-amber-400">Precios gestionados por variante</p>
-              <p className="text-xs text-amber-400/60 mt-0.5">
-                El precio de cada combinación se define en su variante.
-                {form.retailPrice > 0 && ` Más bajo actual: $${form.retailPrice}.`}
-              </p>
+        {skus.length > 0 && (() => {
+          const minPrice = Math.min(...skus.map(s => Number(s.retailPrice)).filter(p => p > 0))
+          return (
+            <div className="p-3 rounded-lg flex items-start gap-3"
+              style={{ backgroundColor: 'rgba(234,179,8,0.08)', border: '1px solid rgba(234,179,8,0.25)' }}>
+              <span className="text-sm shrink-0 mt-0.5">⚠️</span>
+              <div>
+                <p className="text-xs font-medium text-amber-400">Precio base sincronizado con variantes</p>
+                <p className="text-xs text-amber-400/60 mt-0.5">
+                  En el catálogo de productos se muestra el precio de la variante más económica. Actual: ${minPrice || 0}
+                </p>
+              </div>
             </div>
-          </div>
-        )}
+          )
+        })()}
 
         <div className="grid grid-cols-2 gap-4">
           <DropdownSelect label="Estado" value={form.status}
@@ -527,53 +587,44 @@ export default function ProductForm() {
 
         <TagSelect tags={tags} selected={tagIds} onChange={setTagIds} />
 
-        {/* ═══ ATRIBUTOS DEL PRODUCTO (barra) ═══ */}
-        <div className="border-t border-zinc-800 pt-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-zinc-400">
-              Atributos:{' '}
-              {Object.keys(selectedAttributes).length > 0
-                ? Object.entries(selectedAttributes)
-                    .sort(([a], [b]) => Number(a) - Number(b))
-                    .map(([aId]) => attributes.find(a => a.id === Number(aId))?.name)
-                    .filter(Boolean)
-                    .join(', ')
-                : 'Ninguno'}
-              {' • '}
-              {skus.length} variante(s)
-            </span>
-            <Button type="button" variant="secondary" size="sm" onClick={openAttrModal}>
-              Administrar atributos
-            </Button>
-          </div>
-          {hasUnsyncedChanges && (
-            <span className="text-xs text-yellow-400 mt-2 block">
-              Los atributos no coinciden con las variantes — abrí el administrador y actualizá.
-            </span>
-          )}
-        </div>
-
         {/* ═══ VARIANTES (SKUs) ═══ */}
-        {skus.length > 0 && (
-          <div className="border-t border-zinc-800 pt-6">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-lg font-semibold text-zinc-100">Variantes</h2>
-                <p className="text-xs text-zinc-500">Precio, stock e imágenes por variante</p>
-              </div>
+        <div className="border-t border-zinc-800 pt-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-lg font-semibold text-zinc-100">Variantes</h2>
+              <p className="text-xs text-zinc-500">
+                {Object.keys(selectedAttributes).length > 0
+                  ? Object.entries(selectedAttributes)
+                      .sort(([a], [b]) => Number(a) - Number(b))
+                      .map(([aId]) => attributes.find(a => a.id === Number(aId))?.name)
+                      .filter(Boolean)
+                      .join(', ')
+                  : 'Ninguno'}
+                {' • '}
+                {skus.length} variante(s)
+              </p>
+              {hasUnsyncedChanges && (
+                <span className="text-xs text-yellow-400 mt-1 block">
+                  Los atributos no coinciden con las variantes — abrí el administrador y actualizá.
+                </span>
+              )}
             </div>
-            <div className="space-y-2">
-              {skus.map((sku, i) => (
-                <SkuCard key={i} sku={sku} index={i} attributes={attributes}
-                  onChange={updateSku} onRemove={removeSku} />
-              ))}
-            </div>
+            <button type="button" onClick={openAttrModal}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 border border-zinc-700 transition-colors shrink-0">
+              <SlidersHorizontal className="w-4 h-4" /> Administrar atributos
+            </button>
           </div>
-        )}
+          <div className="space-y-2">
+            {skus.map((sku, i) => (
+              <SkuCard key={i} sku={sku} index={i} attributes={attributes}
+                onChange={updateSku} onRemove={removeSku} />
+            ))}
+          </div>
+        </div>
 
         <div className="fixed bottom-0 left-0 right-0 lg:static flex gap-3 justify-end px-4 pb-8 pt-4 lg:p-0 lg:pt-2 bg-zinc-950/95 backdrop-blur-md border-t border-zinc-800 lg:border-0 lg:bg-transparent z-20">
           <Button type="button" variant="secondary" onClick={() => {
-            if (!isDirty) { router.push('/dashboard/products'); return }
+            if (!isDirty) { router.push(backToList); return }
             Alert.fire({
               title: '¿Salir sin guardar?',
               message: 'Tenés cambios sin guardar. Si salís, los cambios se perderán.',
@@ -582,7 +633,7 @@ export default function ProductForm() {
               showCancelButton: true,
               confirmButtonText: 'Salir',
               cancelButtonText: 'Cancelar',
-            }).then(result => { if (result.isConfirmed) router.push('/dashboard/products') })
+            }).then(result => { if (result.isConfirmed) router.push(backToList) })
           }}>Cancelar</Button>
           <Button type="submit" disabled={saving}>{saving ? 'Guardando...' : isEditing ? 'Guardar cambios' : 'Crear producto'}</Button>
         </div>
@@ -599,30 +650,83 @@ export default function ProductForm() {
             {/* Header — fixed */}
             <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 bg-zinc-900/95 backdrop-blur border-b border-zinc-800 sm:rounded-t-2xl shrink-0">
               <h3 className="text-lg font-bold text-zinc-100">Administrar atributos</h3>
-              {attributes.filter(a => !modalAttrs[a.id]).length > 0 && (
-                <div className="relative">
-                  <button type="button" onClick={() => setAttrDropdownOpen(!attrDropdownOpen)}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-cyan-400 border border-zinc-700 hover:border-cyan-500 transition-colors">
-                    <Plus className="w-3 h-3" />
-                    <span className="hidden sm:inline">Agregar atributo</span>
-                    <span className="sm:hidden">Agregar</span>
-                  </button>
-                  {attrDropdownOpen && (
-                    <>
-                      <div className="fixed inset-0 z-30" onClick={() => setAttrDropdownOpen(false)} />
-                      <div className="absolute right-0 top-full mt-1 w-48 py-1 rounded-lg bg-zinc-800 border border-zinc-700 shadow-xl z-40">
-                        {attributes.filter(a => !modalAttrs[a.id]).map(a => (
-                          <button key={a.id} type="button" onClick={() => { modalAddAttr(a); setAttrDropdownOpen(false) }}
-                            className="w-full text-left px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-700 transition-colors">
-                            {a.name}
-                          </button>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </div>
-              )}
+              <button type="button" onClick={handleCancelAttrs}
+                className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-colors" title="Cerrar">
+                <X className="w-5 h-5" />
+              </button>
             </div>
+
+            {/* Searchable select — below header */}
+            {attributes.filter(a => !modalAttrs[a.id]).length > 0 && (
+              <div className="px-6 pt-4 pb-2 shrink-0 relative">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={attrSearch}
+                    onChange={(e) => { setAttrSearch(e.target.value); setAttrSelectOpen(true) }}
+                    onFocus={() => setAttrSelectOpen(true)}
+                    placeholder="Agregar atributo..."
+                    className="w-full pl-9 pr-3 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:border-cyan-500 transition-colors"
+                  />
+                </div>
+                {attrSelectOpen && (
+                  <>
+                    <div className="fixed inset-0 z-30" onClick={() => { setAttrSelectOpen(false); setAttrSearch('') }} />
+                    <div className="absolute left-6 right-6 top-full mt-1 max-h-56 overflow-y-auto rounded-lg bg-zinc-800 border border-zinc-700 shadow-xl z-40 py-1">
+                      {(() => {
+                        const q = attrSearch.toLowerCase()
+                        const filtered = attributes
+                          .filter(a => {
+                            const selected = modalAttrs[a.id]
+                            if (!selected) return true
+                            return selected.size < a.values.length
+                          })
+                          .filter(a => {
+                            if (!q) return true
+                            if (a.name.toLowerCase().includes(q)) return true
+                            return a.values.some(v => v.value.toLowerCase().includes(q))
+                          })
+                        if (!filtered.length) {
+                          return <p className="text-xs text-zinc-600 py-3 px-3">Sin resultados</p>
+                        }
+                        return filtered.map(attr => {
+                          const selected = modalAttrs[attr.id]
+                          return (
+                            <div key={attr.id}>
+                              <button type="button" onClick={() => { modalAddAllValues(attr); setAttrSearch('') }}
+                                className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-zinc-700 transition-colors group">
+                                <Plus className="w-3.5 h-3.5 text-zinc-500 group-hover:text-cyan-400 shrink-0 transition-colors" />
+                                <span className="text-sm font-medium text-zinc-200">{attr.name}</span>
+                                {selected && (
+                                  <span className="text-[10px] text-zinc-500 ml-auto shrink-0">{selected.size}/{attr.values.length}</span>
+                                )}
+                              </button>
+                              {attr.values
+                                .filter(v => !q || v.value.toLowerCase().includes(q))
+                                .map(v => {
+                                  const isSelected = selected?.has(v.id)
+                                  return (
+                                    <button key={v.id} type="button"
+                                      onClick={() => { modalToggleAttrValue(attr.id, v.id); setAttrSearch('') }}
+                                      className={`w-full flex items-center gap-2 pl-8 pr-3 py-1.5 text-left hover:bg-zinc-700 transition-colors group ${isSelected ? 'opacity-50' : ''}`}>
+                                      {isSelected
+                                        ? <Check className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                                        : <span className="w-3.5 h-3.5 rounded-full border border-zinc-600 shrink-0 group-hover:border-cyan-400 transition-colors" />}
+                                      <span className={`text-xs transition-colors ${isSelected ? 'text-zinc-500 line-through' : 'text-zinc-400 group-hover:text-zinc-200'}`}>{v.value}</span>
+                                    </button>
+                                  )
+                                })
+                              }
+                            </div>
+                          )
+                        })
+                      })()}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
 
             {/* Body — scrollable */}
             <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3" style={{ minHeight: '40vh' }}>
@@ -644,35 +748,15 @@ export default function ProductForm() {
                           </button>
                         </div>
                         <div className="flex flex-col gap-2">
-                          {attr.values.map(v => {
-                            const checked = valueIds.has(v.id)
-                            return (
-                              <div key={v.id}
-                                className={`rounded-xl border-2 p-3 transition-colors min-h-[100px] flex flex-col ${
-                                  checked ? 'border-cyan-500 bg-cyan-500/10' : 'border-zinc-700'
-                                }`}>
-                                {/* Toggle button — top */}
-                                <button
-                                  onClick={() => modalToggleAttr(attrId, v.id)}
-                                  className="flex items-center gap-2 hover:opacity-80 transition-opacity mb-2 group cursor-pointer hover:bg-zinc-800/30 rounded-lg px-2 py-1 -mx-2 -my-1">
-                                  {checked ? <Trash2 className="w-4 h-4 text-zinc-500 group-hover:text-red-400 transition-colors" /> : <Plus className="w-4 h-4 text-zinc-500 group-hover:text-cyan-400 transition-colors" />}
-                                  <span className={`text-sm font-medium ${checked ? 'text-cyan-400' : 'text-zinc-300'}`}>{v.value}</span>
-                                </button>
-                                {/* Images — below */}
-                                {checked && (
-                                  <div className="flex-1">
-                                    <ImageUpload
-                                      images={v.images || []}
-                                      onChange={(imgs) => updateAttrValueImages(v.id, imgs)}
-                                      max={2}
-                                      cols={4}
-                                      folder="atributos"
-                                    />
-                                  </div>
-                                )}
-                              </div>
-                            )
-                          })}
+                          {attr.values.filter(v => valueIds.has(v.id)).map(v => (
+                            <AttributeValueCard
+                              key={v.id}
+                              value={v.value}
+                              images={v.images || []}
+                              onRemove={() => modalToggleAttr(attrId, v.id)}
+                              onUpdateImages={(imgs) => updateAttrValueImages(v.id, imgs)}
+                            />
+                          ))}
                         </div>
                       </div>
                     </Fragment>
