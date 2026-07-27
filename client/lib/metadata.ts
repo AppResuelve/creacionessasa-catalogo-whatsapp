@@ -27,17 +27,3 @@ export function productMetadata(product: any) {
     },
   }
 }
-
-export function serviceMetadata(service: any) {
-  const desc = service?.description?.substring(0, 155)
-  return {
-    title: service?.name,
-    description: desc,
-    alternates: { canonical: `${BASE_URL}/servicios/${service?.slug}` },
-    openGraph: {
-      title: service?.name,
-      images: service?.images?.[0] ? [service.images[0]] : undefined,
-      url: `${BASE_URL}/servicios/${service?.slug}`,
-    },
-  }
-}

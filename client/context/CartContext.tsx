@@ -40,20 +40,6 @@ function cartReducer(state, action) {
       }
     }
 
-    case 'ADD_SERVICE_ITEM': {
-      const { serviceId, serviceSlug, serviceName, variantId, variantName, variantPrice, selectedModifiers, quantity } = action.payload
-      const key = `svc-${serviceId}-${variantId}-${selectedModifiers.map(m => m.id).sort().join(',')}`
-      const existingIndex = state.items.findIndex(
-        (item) => item.key === key
-      )
-      if (existingIndex >= 0) {
-        const newItems = [...state.items]
-        newItems[existingIndex] = { ...newItems[existingIndex], quantity: newItems[existingIndex].quantity + quantity }
-        return { ...state, items: newItems }
-      }
-      return { ...state, items: [...state.items, { type: 'service', key, serviceId, serviceSlug, serviceName, variantId, variantName, variantPrice, selectedModifiers, quantity }] }
-    }
-
     case 'REMOVE_ITEM':
       return {
         ...state,
@@ -102,12 +88,6 @@ export function CartProvider({ children }) {
 
   const cartItems = useMemo(() => {
     return state.items.map((item) => {
-      if (item.type === 'service') {
-        const modifiersTotal = (item.selectedModifiers || []).reduce((sum, m) => sum + Number(m.price), 0)
-        const unitPrice = item.variantPrice + modifiersTotal
-        return { ...item, id: item.key, unitPrice, subtotal: unitPrice * item.quantity }
-      }
-
       const product = productsMap[item.productId]
       if (!product) {
         return {
@@ -159,10 +139,6 @@ export function CartProvider({ children }) {
     dispatch({ type: 'ADD_ITEM', payload: { productId, quantity, skuId } })
   }
 
-  const addServiceItem = (data) => {
-    dispatch({ type: 'ADD_SERVICE_ITEM', payload: data })
-  }
-
   const removeItem = (key) => {
     dispatch({ type: 'REMOVE_ITEM', payload: { key } })
   }
@@ -186,7 +162,6 @@ export function CartProvider({ children }) {
     totalItems,
     totalPrice,
     addItem,
-    addServiceItem,
     removeItem,
     updateQuantity,
     clearCart,

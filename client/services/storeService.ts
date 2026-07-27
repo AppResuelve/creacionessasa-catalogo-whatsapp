@@ -27,15 +27,6 @@ export const ordersService = {
   },
 }
 
-export const servicesService = {
-  list(params = {}) {
-    return api.get("/store/services", { params }).then((r) => r.data)
-  },
-  getBySlug(slug: string) {
-    return api.get(`/store/services/${slug}`).then((r) => r.data)
-  },
-}
-
 export const tagsService = {
   list(params = {}) {
     return api.get("/store/tags", { params }).then((r) => r.data)

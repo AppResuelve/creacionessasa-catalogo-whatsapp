@@ -63,11 +63,12 @@ export default function ProductDetailClient({ product }: { product: any }) {
   const hasWholesale = wholesalePrice && wholesaleMinQty
 
   const displayImages = useMemo(() => {
-    if (!derivedSku) return product?.images || []
+    const baseImages = product?.images || []
+    if (!derivedSku) return baseImages
     const attrImages = (derivedSku.attributeValues || [])
       .flatMap(av => av.images || [])
       .filter(Boolean)
-    return attrImages.length > 0 ? attrImages : (product?.images || [])
+    return [...attrImages, ...baseImages]
   }, [derivedSku, product])
 
   // Auto-seleccionar primer valor de cada grupo
