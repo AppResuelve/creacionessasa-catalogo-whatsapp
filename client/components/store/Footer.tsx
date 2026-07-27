@@ -245,7 +245,7 @@ export function Footer({ waveFromColor }) {
                 {categories.map((cat) => (
                   <li key={cat.id}>
                     <Link
-                      href={`/productos?cat=${encodeURIComponent(cat.name)}`}
+                      href={`/productos?cat=${encodeURIComponent(cat.slug || cat.name)}`}
                       className="text-sm transition-colors duration-200"
                       style={{ color: "var(--color-text-secondary)" }}
                       onMouseEnter={(e) =>

@@ -5,20 +5,20 @@ import { Container } from "./Container";
 const categories = [
   {
     name: "Accesorios",
-    href: "/productos?categoria=accesorios-bebe",
+    href: "/productos?cat=accesorios-bebe",
     image: "/home/accesorios-bebe.jpeg",
     description:
       "Detalles que los hacen únicos\n*Baberos, babitas, portachupetes y más…",
   },
   {
     name: "Mantas",
-    href: "/productos?categoria=mantas",
+    href: "/productos?cat=mantas",
     image: "/home/mantas.jpeg",
     description: "Suavidad que envuelve con amor",
   },
   {
     name: "Hora del baño",
-    href: "/productos?categoria=hora-del-bano",
+    href: "/productos?cat=hora-del-bano",
     image: "/home/hora-del-bano.jpeg",
     description: "Toallones, batas, toallas, indispensable para el baño de tu bebé",
   },

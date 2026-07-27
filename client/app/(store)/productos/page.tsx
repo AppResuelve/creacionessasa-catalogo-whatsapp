@@ -250,7 +250,7 @@ export default function Products() {
     const sp = new URLSearchParams();
     if (selectedCategory !== "Todos") {
       const cat = categories.find((c) => String(c.id) === selectedCategory);
-      if (cat) sp.set("cat", cat.name);
+      if (cat) sp.set("cat", cat.slug);
     }
     if (selectedTagIds.length > 0) sp.set("tags", selectedTagIds.join(","));
     router.replace(sp.toString() ? `?${sp.toString()}` : window.location.pathname, { scroll: false });
