@@ -7,12 +7,9 @@ export function StorySection() {
       <Container>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center">
           <div>
-            <h2
-              className="text-3xl md:text-4xl font-light text-[var(--color-text-primary)] mb-6"
-              style={{ fontFamily: "var(--font-heading)" }}
-            >
-              Hace más de 15 años que cada puntada tiene un propósito.
-            </h2>
+            <span className="inline-block text-lg font-medium tracking-[0.2em] uppercase text-[var(--color-primary)] mb-4">
+              Nuestra historia
+            </span>
             <div className="space-y-4 text-[var(--color-text-secondary)] leading-relaxed">
               <p>
                 Creaciónes Sasa nace de la pasión por crear, puntada tras puntada, ajuares soñados por familias, en el momento más especial de sus vidas, como es la llegada de un hijo.
