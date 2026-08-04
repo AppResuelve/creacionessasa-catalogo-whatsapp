@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { Upload, X } from "lucide-react";
 import { uploadImage } from "@/services/admin-api";
+import { compressImages } from "@/utils/compressImage";
 import { Spinner } from "./ui/Spinner";
 import { useAlert } from "./ui/AlertContext";
 
@@ -42,8 +43,9 @@ export default function ImageUpload({
 
     setUploading(true);
     try {
+      const processedFiles = await compressImages(files);
       const results = await Promise.allSettled(
-        files.map((file) => uploadImage(file, folder))
+        processedFiles.map((file) => uploadImage(file, folder))
       );
 
       const newImages = [...images];
