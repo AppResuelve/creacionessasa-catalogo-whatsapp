@@ -22,19 +22,48 @@ export default function ImageUpload({
   const handleUpload = async (e) => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
+
     if (images.length + files.length > max) {
       Alert.fire({ message: `Máximo ${max} imágenes`, type: "warning" });
       return;
     }
 
+    const allowedMimes = /^image\/(jpeg|jpg|png|webp|gif)$/;
+    for (const file of files) {
+      if (file.size > 10 * 1024 * 1024) {
+        Alert.fire({ message: `"${file.name}" supera los 10MB`, type: "warning" });
+        return;
+      }
+      if (!allowedMimes.test(file.type)) {
+        Alert.fire({ message: `"${file.name}" no es una imagen válida (jpg, png, webp, gif)`, type: "warning" });
+        return;
+      }
+    }
+
     setUploading(true);
     try {
+      const results = await Promise.allSettled(
+        files.map((file) => uploadImage(file, folder))
+      );
+
       const newImages = [...images];
-      for (const file of files) {
-        const data = await uploadImage(file, folder);
-        newImages.push(data.url);
-      }
+      const errors = [];
+      results.forEach((result, i) => {
+        if (result.status === "fulfilled") {
+          newImages.push(result.value.url);
+        } else {
+          errors.push(files[i].name);
+        }
+      });
+
       onChange(newImages);
+
+      if (errors.length) {
+        Alert.fire({
+          message: `Error al subir: ${errors.join(", ")}`,
+          type: errors.length === files.length ? "error" : "warning",
+        });
+      }
     } catch (err) {
       let msg = "Error al subir imagen";
       try {
