@@ -14,7 +14,7 @@ export function Hero() {
               className="text-4xl md:text-5xl lg:text-6xl font-light leading-[1.08] text-[var(--color-text-primary)] mb-6"
               style={{ fontFamily: "var(--font-heading)" }}
             >
-              Blanquearía para bebés.
+              Blanquería para bebés.
               <br />
               Hecho a mano, creado con amor.
             </h1>

@@ -7,12 +7,8 @@ const benefits = [
     description: 'Cada costura es real. Nada de producción en serie. Cada pieza pasa por las manos de quien la diseña.',
   },
   {
-    title: 'Personalizamos nombres',
+    title: 'Productos personalizados',
     description: 'Bordamos el nombre del bebé en acolchados, toallones, sábanas. Un detalle que convierte cada pieza en única.',
-  },
-  {
-    title: 'Materiales suaves',
-    description: 'Solo usamos telas hipoalergénicas, livianas y respetuosas con la piel del recién nacido.',
   },
 ]
 
@@ -20,7 +16,7 @@ export function BenefitsSection() {
   return (
     <section className="py-16 md:py-24 bg-[var(--color-surface)]">
       <Container>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16">
           {benefits.map((b) => (
             <div key={b.title}>
               <h3
