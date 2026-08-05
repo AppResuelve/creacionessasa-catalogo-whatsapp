@@ -1,7 +1,7 @@
 // @ts-nocheck
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { ExternalLink, Globe, AlertTriangle, Pencil, Copy } from 'lucide-react'
+import { ExternalLink, Globe, AlertTriangle, Pencil, Copy, Check } from 'lucide-react'
 import { Spinner } from '@/components/admin/ui/Spinner'
 import { DropdownSelect } from '@/components/admin/ui/DropdownSelect'
 import api from '@/services/admin-api'
@@ -57,6 +57,7 @@ export default function Store() {
   }
 
   const [storeUrl, setStoreUrl] = useState(typeof window !== 'undefined' ? window.location.origin : '')
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     const host = window.location.host.replace(/^admin\./, '')
@@ -66,6 +67,8 @@ export default function Store() {
 
   const handleCopyUrl = () => {
     navigator.clipboard.writeText(storeUrl)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   if (!storeUrl) {
@@ -93,7 +96,7 @@ export default function Store() {
             onClick={handleCopyUrl}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200 transition-colors text-sm font-medium"
           >
-            <Copy className="w-3 h-3" />
+            {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
             URL
           </button>
           <a
@@ -102,7 +105,8 @@ export default function Store() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 transition-colors text-sm font-medium"
           >
-            Ver tienda
+            <span className="hidden sm:inline">Ver tienda</span>
+            <span className="sm:hidden">Ver</span>
             <ExternalLink className="w-3 h-3" />
           </a>
         </div>
