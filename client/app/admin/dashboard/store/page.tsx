@@ -1,7 +1,7 @@
 // @ts-nocheck
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { ExternalLink, Globe, AlertTriangle, Pencil } from 'lucide-react'
+import { ExternalLink, Globe, AlertTriangle, Pencil, Copy } from 'lucide-react'
 import { Spinner } from '@/components/admin/ui/Spinner'
 import { DropdownSelect } from '@/components/admin/ui/DropdownSelect'
 import api from '@/services/admin-api'
@@ -64,6 +64,10 @@ export default function Store() {
     setStoreUrl(`${protocol}//${host}`)
   }, [])
 
+  const handleCopyUrl = () => {
+    navigator.clipboard.writeText(storeUrl)
+  }
+
   if (!storeUrl) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -84,15 +88,24 @@ export default function Store() {
           <h1 className="text-2xl font-bold text-zinc-100">Tienda</h1>
           <p className="text-sm text-zinc-500">Vista previa de tu sitio público</p>
         </div>
-        <a
-          href={storeUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 transition-colors text-sm font-medium"
-        >
-          Ver tienda
-          <ExternalLink className="w-3 h-3" />
-        </a>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleCopyUrl}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200 transition-colors text-sm font-medium"
+          >
+            <Copy className="w-3 h-3" />
+            URL
+          </button>
+          <a
+            href={storeUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 transition-colors text-sm font-medium"
+          >
+            Ver tienda
+            <ExternalLink className="w-3 h-3" />
+          </a>
+        </div>
       </div>
 
       {/* Iframe preview — se escala como mockup desktop */}
