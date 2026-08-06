@@ -17,21 +17,34 @@ interface TagGroupData {
 interface TagGroupProps {
   tag: TagGroupData
   selectedTagIds: number[]
-  selectionMode: 'single' | 'multiple'
   onToggle: (tagValueId: number, tagId: number) => void
 }
 
 export function TagGroup({
   tag,
   selectedTagIds,
-  selectionMode,
   onToggle,
 }: TagGroupProps) {
-  const groupValueIds = tag.values.map(v => v.id)
-  const hasSelectedInGroup = tag.values.some(v => selectedTagIds.includes(v.id))
+
+  if (tag.values.length === 1) {
+    const tv = tag.values[0]
+    const isSelected = selectedTagIds.includes(tv.id)
+    return (
+      <div className="mb-3">
+        <TagOption
+          label={tv.value}
+          color={tag.color}
+          selected={isSelected}
+          disabled={!tv.isAvailable}
+          onClick={() => onToggle(tv.id, tag.id)}
+        />
+        <hr className="border-[var(--color-border)] mt-2" />
+      </div>
+    )
+  }
 
   return (
-    <div className="mb-6 last:mb-0">
+    <div className="mb-6">
       <div className="flex items-center gap-2 mb-3">
         <div
           className="w-2.5 h-2.5 rounded-full"
@@ -50,6 +63,7 @@ export function TagGroup({
             <TagOption
               key={tv.id}
               label={tv.value}
+              color={tag.color}
               selected={isSelected}
               disabled={!tv.isAvailable}
               onClick={() => onToggle(tv.id, tag.id)}
@@ -57,6 +71,8 @@ export function TagGroup({
           )
         })}
       </div>
+
+      <hr className="border-[var(--color-border)] mt-3" />
     </div>
   )
 }
