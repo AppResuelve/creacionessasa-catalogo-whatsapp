@@ -269,6 +269,10 @@ export default function ProductsClient({
   }, [categoryId, selectedTagIds]);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }, [page])
+
+  useEffect(() => {
     const sp = new URLSearchParams();
     if (selectedCategory !== "Todos") {
       const cat = categories.find((c) => String(c.id) === selectedCategory);
@@ -568,7 +572,9 @@ export default function ProductsClient({
               )}
 
               {loading && !isFirstFetch ? (
-                <LoadingGrid />
+                <div className="flex items-center justify-center py-20">
+                  <div className="w-8 h-8 border-2 border-[var(--color-border)] border-t-[var(--color-primary)] rounded-full animate-spin" />
+                </div>
               ) : products.length > 0 ? (
                 <>
                   <ProductGrid products={products} />
