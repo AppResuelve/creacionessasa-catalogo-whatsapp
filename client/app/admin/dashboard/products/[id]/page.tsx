@@ -156,8 +156,14 @@ export default function ProductForm() {
   const { product, loading: productLoading } = useProduct(id)
   const { categories } = useCategories()
 
-  const fromPage = searchParams?.get('page')
-  const backToList = fromPage ? `/dashboard/products?page=${fromPage}` : '/dashboard/products'
+  const backParams = new URLSearchParams()
+  const pageVal = searchParams?.get('page')
+  const catVal = searchParams?.get('categoryId')
+  const tagVal = searchParams?.get('tagId')
+  if (pageVal) backParams.set('page', pageVal)
+  if (catVal) backParams.set('categoryId', catVal)
+  if (tagVal) backParams.set('tagId', tagVal)
+  const backToList = `/dashboard/products?${backParams.toString()}`
 
   const [form, setForm] = useState(EMPTY_PRODUCT)
   const [skus, setSkus] = useState([])
