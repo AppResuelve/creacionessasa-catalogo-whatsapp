@@ -214,7 +214,11 @@ export default function Categories() {
                     : 'bg-amber-500/10 text-amber-400 border-amber-500/30 hover:bg-amber-500/20'
                   }`}
               >
-                <span className={`w-2 h-2 rounded-full ${cat.status === 'active' ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+                {toggling === cat.id ? (
+                  <Spinner size="sm" />
+                ) : (
+                  <span className={`w-2 h-2 rounded-full ${cat.status === 'active' ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+                )}
                 {cat.status === 'active' ? 'Activo' : 'Borrador'}
               </button>
               <button onClick={() => openEdit(cat)} className="p-1.5 rounded-lg text-zinc-500 hover:text-cyan-400 hover:bg-cyan-500/10 transition-colors opacity-0 group-hover:opacity-100">
