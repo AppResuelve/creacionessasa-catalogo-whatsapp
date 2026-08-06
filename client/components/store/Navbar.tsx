@@ -132,6 +132,7 @@ export function Navbar({ heroMode = false }) {
                       {item.label}
                       {hasCategories && (
                         <ChevronDown
+                          suppressHydrationWarning
                           className={`w-3.5 h-3.5 transition-transform ${desktopProductsOpen ? "rotate-180" : ""}`}
                         />
                       )}
@@ -317,6 +318,7 @@ export function Navbar({ heroMode = false }) {
                           {item.label}
                         </span>
                         <ChevronDown
+                          suppressHydrationWarning
                           className="w-4 h-4 transition-transform"
                           style={{
                             transform: mobileProductsOpen
